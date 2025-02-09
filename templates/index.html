@@ -1,161 +1,285 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Aviator Analysis Tool</title>
+    <title>Aviator Analyst Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        :root {
+            --primary: #4CAF50;
+            --background: #1a1a1a;
+            --surface: #2d2d2d;
+            --text: #ffffff;
+        }
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #1a1a1a;
-            color: #ffffff;
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--background);
+            color: var(--text);
             margin: 0;
             padding: 20px;
         }
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
             gap: 20px;
         }
-        h1 {
-            color: #4CAF50;
-            text-align: center;
-        }
-        .warning {
-            color: #ff4444;
-            font-weight: bold;
-            text-align: center;
-        }
-        .input-section, .results-section {
-            background-color: #2d2d2d;
+        .panel {
+            background: var(--surface);
+            border-radius: 12px;
             padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            flex: 1;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         textarea {
             width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #4CAF50;
-            background-color: #404040;
-            color: #ffffff;
+            padding: 12px;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            background: #333;
+            color: var(--text);
+            margin: 10px 0;
         }
         button {
-            background-color: #4CAF50;
-            color: #ffffff;
+            background: var(--primary);
+            color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 12px 24px;
+            border-radius: 8px;
             cursor: pointer;
-            margin-top: 10px;
+            font-weight: bold;
+            transition: all 0.3s;
         }
         button:hover {
-            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76,175,80,0.3);
+        }
+        .suggestion {
+            background: #2d2d2d;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid var(--primary);
+        }
+        .reason {
+            color: #4CAF50;
+            font-size: 0.9em;
+            margin-top: 8px;
         }
         .chart-container {
-            flex: 2;
-            background-color: #2d2d2d;
-            padding: 20px;
-            border-radius: 10px;
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
         }
         canvas {
-            background-color: #2d2d2d;
-            border-radius: 10px;
+            width: 100% !important;
+            height: auto !important;
         }
     </style>
 </head>
 <body>
-    <h1>Aviator Analysis Tool</h1>
-    <p class="warning">⚠️ Warning: This tool does NOT predict outcomes. Gambling involves risk.</p>
-
     <div class="container">
-        <!-- Left Side: Input and Results -->
-        <div>
-            <!-- Input Section -->
-            <div class="input-section">
-                <h2>Enter Crash Multipliers</h2>
-                <textarea id="crashInput" rows="5" placeholder="Enter multipliers separated by commas (e.g., 1.5, 2.0, 0.8)"></textarea>
-                <button onclick="analyzeData()">Analyze</button>
+        <!-- Left Panel -->
+        <div class="panel">
+            <h1>Aviator Analyst Pro</h1>
+            <p class="warning">⚠️ Educational tool only - Does NOT predict outcomes</p>
+            
+            <textarea id="inputData" placeholder="Enter multipliers separated by commas
+Example: 1.25, 0.85, 2.10, 1.75, 3.00"></textarea>
+            
+            <button onclick="analyze()">Analyze Patterns</button>
+            
+            <div class="suggestion">
+                <h3>Smart Cash-Out Recommendation</h3>
+                <div id="suggestionValue">-</div>
+                <div id="suggestionReason" class="reason"></div>
             </div>
-
-            <!-- Results Section -->
-            <div class="results-section">
-                <h2>Analysis Results</h2>
-                <p><strong>Average Multiplier:</strong> <span id="avgMultiplier">-</span></p>
-                <p><strong>Median Multiplier:</strong> <span id="medianMultiplier">-</span></p>
-                <p><strong>Probability of 2x or Higher:</strong> <span id="probAbove2x">-</span></p>
-                <p><strong>Suggested Cash-Out Point:</strong> <span id="cashOutPoint">-</span></p>
-                <p><strong>Next Cash-Out Suggestion:</strong> <span id="nextCashOut">-</span></p>
+            
+            <div class="stats">
+                <h3>Market Analysis</h3>
+                <p>📈 Average Multiplier: <span id="avg">-</span></p>
+                <p>⚖️ Median Multiplier: <span id="median">-</span></p>
+                <p>🎯 2x+ Probability: <span id="prob2x">-</span></p>
             </div>
         </div>
 
-        <!-- Right Side: Chart -->
-        <div class="chart-container">
-            <canvas id="crashChart"></canvas>
+        <!-- Right Panel -->
+        <div class="panel">
+            <div class="chart-container">
+                <h3>Multiplier Trend</h3>
+                <canvas id="trendChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Multiplier Frequency</h3>
+                <canvas id="frequencyChart"></canvas>
+            </div>
         </div>
     </div>
 
     <script>
-        let crashChart;
+        let trendChart, frequencyChart;
 
-        // Analyze data
-        function analyzeData() {
-            const input = document.getElementById('crashInput').value;
-            const crashPoints = input.split(',').map(x => parseFloat(x.trim()));
-
+        function analyze() {
+            const input = document.getElementById('inputData').value;
+            const points = input.split(',').map(x => parseFloat(x.trim())).filter(x => !isNaN(x));
+            
             fetch('/api/analyze', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ crash_points: crashPoints })
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({crash_points: points})
             })
-            .then(res => res.json())
+            .then(r => r.json())
             .then(data => {
-                // Update results
-                document.getElementById('avgMultiplier').textContent = data.avg_multiplier;
-                document.getElementById('medianMultiplier').textContent = data.median_multiplier;
-                document.getElementById('probAbove2x').textContent = `${(data.prob_above_2x * 100).toFixed(2)}%`;
-                document.getElementById('cashOutPoint').textContent = data.cash_out_point;
+                // Update basic stats
+                document.getElementById('avg').textContent = data.avg;
+                document.getElementById('median').textContent = data.median;
+                document.getElementById('prob2x').textContent = `${(data.prob_2x * 100).toFixed(1)}%`;
 
-                // Suggest next cash-out point
-                const nextCashOut = suggestNextCashOut(data.crash_points);
-                document.getElementById('nextCashOut').textContent = nextCashOut;
+                // Generate smart suggestion
+                const suggestion = generateSmartSuggestion(data.crash_points);
+                document.getElementById('suggestionValue').innerHTML = 
+                    `<span style="font-size: 1.5em; color: #4CAF50">${suggestion.value}x</span>`;
+                document.getElementById('suggestionReason').textContent = suggestion.reason;
 
-                // Update chart
-                if (crashChart) crashChart.destroy();
-                crashChart = new Chart(document.getElementById('crashChart'), {
-                    type: 'bar',
-                    data: {
-                        labels: data.crash_points.map((_, i) => i + 1),
-                        datasets: [{
-                            label: 'Crash Multipliers',
-                            data: data.crash_points,
-                            backgroundColor: 'rgba(76, 175, 80, 0.5)',
-                            borderColor: '#4CAF50',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            y: { beginAtZero: true, title: { display: true, text: 'Multiplier' } },
-                            x: { title: { display: true, text: 'Round Number' } }
-                        }
-                    }
-                });
+                // Update charts
+                updateTrendChart(data.crash_points);
+                updateFrequencyChart(data.crash_points);
             });
         }
 
-        // Suggest next cash-out point
-        function suggestNextCashOut(crashPoints) {
-            const safeMultiplier = Math.min(2.0, Math.median(crashPoints));
-            return `Cash out at ${safeMultiplier.toFixed(2)}x`;
+        function generateSmartSuggestion(points) {
+            if (points.length < 3) return {
+                value: '1.50x',
+                reason: 'Insufficient data for analysis'
+            };
+
+            // Advanced pattern detection
+            const recent = points.slice(-3);
+            const trend = recent[2] - recent[0];
+            const volatility = calculateVolatility(points);
+            const avgShort = recent.reduce((a,b) => a + b)/3;
+            const riskProfile = calculateRiskProfile(points);
+
+            let baseSuggestion, reason;
+
+            // Trend-based logic
+            if (trend > 0.5) {
+                baseSuggestion = avgShort * 0.85;
+                reason = `📈 Rising trend detected (Last 3: ${recent.map(x => x.toFixed(1))})`;
+            } else if (trend < -0.3) {
+                baseSuggestion = Math.max(1.2, avgShort * 0.7);
+                reason = `📉 Downtrend detected (Last 3: ${recent.map(x => x.toFixed(1))})`;
+            } else {
+                baseSuggestion = riskProfile.safeValue;
+                reason = `⚖️ Stable market conditions (Volatility: ${volatility.toFixed(2)})`;
+            }
+
+            // Volatility adjustment
+            if (volatility > 1.2) {
+                baseSuggestion *= 0.9;
+                reason += " | High volatility adjustment";
+            } else if (volatility < 0.5) {
+                baseSuggestion *= 1.1;
+                reason += " | Low volatility boost";
+            }
+
+            // Probability boost
+            if (riskProfile.prob2x > 0.4) {
+                baseSuggestion += 0.15;
+                reason += " | Good 2x+ probability";
+            }
+
+            // Final clamping
+            const final = Math.min(Math.max(baseSuggestion, 1.15), 3.0);
+            
+            return {
+                value: Math.round(final * 20)/20 + 'x',
+                reason: reason
+            };
         }
 
-        // Helper function to calculate median
-        Math.median = function (arr) {
-            const mid = Math.floor(arr.length / 2);
-            const sorted = [...arr].sort((a, b) => a - b);
-            return arr.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+        function calculateVolatility(points) {
+            const mean = points.reduce((a,b) => a + b)/points.length;
+            return Math.sqrt(points.reduce((a,b) => a + Math.pow(b-mean, 2), 0)/points.length);
+        }
+
+        function calculateRiskProfile(points) {
+            const safeValue = Math.percentile(points, 25);
+            const prob2x = points.filter(x => x >= 2).length / points.length;
+            return {safeValue, prob2x};
+        }
+
+        function updateTrendChart(points) {
+            if (trendChart) trendChart.destroy();
+            
+            trendChart = new Chart(document.getElementById('trendChart'), {
+                type: 'line',
+                data: {
+                    labels: points.map((_,i) => i+1),
+                    datasets: [{
+                        label: 'Multiplier Trend',
+                        data: points,
+                        borderColor: '#4CAF50',
+                        tension: 0.3,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {display: false},
+                        tooltip: {mode: 'index', intersect: false}
+                    },
+                    scales: {
+                        x: {title: {display: true, text: 'Round Number'}},
+                        y: {title: {display: true, text: 'Multiplier'}}
+                    }
+                }
+            });
+        }
+
+        function updateFrequencyChart(points) {
+            if (frequencyChart) frequencyChart.destroy();
+
+            // Create bins for histogram
+            const bins = Array.from({ length: 10 }, (_, i) => i * 0.5);
+            const frequencies = bins.map(bin => 
+                points.filter(x => x >= bin && x < bin + 0.5).length
+            );
+
+            frequencyChart = new Chart(document.getElementById('frequencyChart'), {
+                type: 'bar',
+                data: {
+                    labels: bins.map(bin => `${bin.toFixed(1)}x - ${(bin + 0.5).toFixed(1)}x`),
+                    datasets: [{
+                        label: 'Frequency',
+                        data: frequencies,
+                        backgroundColor: 'rgba(76, 175, 80, 0.5)',
+                        borderColor: '#4CAF50',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {display: false},
+                        tooltip: {mode: 'index', intersect: false}
+                    },
+                    scales: {
+                        x: {title: {display: true, text: 'Multiplier Range'}},
+                        y: {title: {display: true, text: 'Frequency'}}
+                    }
+                }
+            });
+        }
+
+        // Helper functions
+        Math.percentile = function(arr, p) {
+            const sorted = [...arr].sort((a,b) => a - b);
+            const pos = (sorted.length - 1) * p/100;
+            const base = Math.floor(pos);
+            const rest = pos - base;
+            return sorted[base] + rest * (sorted[base+1] - sorted[base]);
         };
     </script>
 </body>
