@@ -16,19 +16,27 @@
             color: var(--text);
             margin: 0;
             padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         .container {
-            max-width: 1200px;
+            flex: 1;
+            max-width: 1400px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 1fr 2fr;
+            grid-template-columns: 350px 1fr;
             gap: 20px;
+            height: calc(100vh - 40px);
         }
         .panel {
             background: var(--surface);
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
         textarea {
             width: 100%;
@@ -66,14 +74,17 @@
             margin-top: 8px;
         }
         .chart-container {
-            background: var(--surface);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
+            flex: 1;
+            min-height: 0; /* Fix for Firefox */
+            position: relative;
+            margin-bottom: 15px;
+        }
+        .chart-container:last-child {
+            margin-bottom: 0;
         }
         canvas {
             width: 100% !important;
-            height: auto !important;
+            height: 100% !important;
         }
     </style>
 </head>
@@ -226,13 +237,20 @@ Example: 1.25, 0.85, 2.10, 1.75, 3.00"></textarea>
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {display: false},
                         tooltip: {mode: 'index', intersect: false}
                     },
                     scales: {
-                        x: {title: {display: true, text: 'Round Number'}},
-                        y: {title: {display: true, text: 'Multiplier'}}
+                        x: { 
+                            title: {display: true, text: 'Round Number'},
+                            grid: {color: 'rgba(255,255,255,0.1)'}
+                        },
+                        y: { 
+                            title: {display: true, text: 'Multiplier'},
+                            grid: {color: 'rgba(255,255,255,0.1)'}
+                        }
                     }
                 }
             });
@@ -261,13 +279,20 @@ Example: 1.25, 0.85, 2.10, 1.75, 3.00"></textarea>
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {display: false},
                         tooltip: {mode: 'index', intersect: false}
                     },
                     scales: {
-                        x: {title: {display: true, text: 'Multiplier Range'}},
-                        y: {title: {display: true, text: 'Frequency'}}
+                        x: { 
+                            title: {display: true, text: 'Multiplier Range'},
+                            grid: {color: 'rgba(255,255,255,0.1)'}
+                        },
+                        y: { 
+                            title: {display: true, text: 'Frequency'},
+                            grid: {color: 'rgba(255,255,255,0.1)'}
+                        }
                     }
                 }
             });
