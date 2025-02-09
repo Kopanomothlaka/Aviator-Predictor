@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Aviator Analysis Tool</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 20px;
+        }
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+        }
+        .warning {
+            color: #ff4444;
+            font-weight: bold;
+            text-align: center;
+        }
+        .input-section, .results-section {
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            flex: 1;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #4CAF50;
+            background-color: #404040;
+            color: #ffffff;
+        }
+        button {
+            background-color: #4CAF50;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .chart-container {
+            flex: 2;
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        canvas {
+            background-color: #2d2d2d;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Aviator Analysis Tool</h1>
+    <p class="warning">⚠️ Warning: This tool does NOT predict outcomes. Gambling involves risk.</p>
+
+    <div class="container">
+        <!-- Left Side: Input and Results -->
+        <div>
+            <!-- Input Section -->
+            <div class="input-section">
+                <h2>Enter Crash Multipliers</h2>
+                <textarea id="crashInput" rows="5" placeholder="Enter multipliers separated by commas (e.g., 1.5, 2.0, 0.8)"></textarea>
+                <button onclick="analyzeData()">Analyze</button>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section">
+                <h2>Analysis Results</h2>
+                <p><strong>Average Multiplier:</strong> <span id="avgMultiplier">-</span></p>
+                <p><strong>Median Multiplier:</strong> <span id="medianMultiplier">-</span></p>
+                <p><strong>Probability of 2x or Higher:</strong> <span id="probAbove2x">-</span></p>
+                <p><strong>Suggested Cash-Out Point:</strong> <span id="cashOutPoint">-</span></p>
+                <p><strong>Next Cash-Out Suggestion:</strong> <span id="nextCashOut">-</span></p>
+            </div>
+        </div>
+
+        <!-- Right Side: Chart -->
+        <div class="chart-container">
+            <canvas id="crashChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        let crashChart;
+
+        // Analyze data
+        function analyzeData() {
+            const input = document.getElementById('crashInput').value;
+            const crashPoints = input.split(',').map(x => parseFloat(x.trim()));
+
+            fetch('/api/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ crash_points: crashPoints })
+            })
+            .then(res => res.json())
+            .then(data => {
+                // Update results
+                document.getElementById('avgMultiplier').textContent = data.avg_multiplier;
+                document.getElementById('medianMultiplier').textContent = data.median_multiplier;
+                document.getElementById('probAbove2x').textContent = `${(data.prob_above_2x * 100).toFixed(2)}%`;
+                document.getElementById('cashOutPoint').textContent = data.cash_out_point;
+
+                // Suggest next cash-out point
+                const nextCashOut = suggestNextCashOut(data.crash_points);
+                document.getElementById('nextCashOut').textContent = nextCashOut;
+
+                // Update chart
+                if (crashChart) crashChart.destroy();
+                crashChart = new Chart(document.getElementById('crashChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: data.crash_points.map((_, i) => i + 1),
+                        datasets: [{
+                            label: 'Crash Multipliers',
+                            data: data.crash_points,
+                            backgroundColor: 'rgba(76, 175, 80, 0.5)',
+                            borderColor: '#4CAF50',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'Multiplier' } },
+                            x: { title: { display: true, text: 'Round Number' } }
+                        }
+                    }
+                });
+            });
+        }
+
+        // Suggest next cash-out point
+        function suggestNextCashOut(crashPoints) {
+            const safeMultiplier = Math.min(2.0, Math.median(crashPoints));
+            return `Cash out at ${safeMultiplier.toFixed(2)}x`;
+        }
+
+        // Helper function to calculate median
+        Math.median = function (arr) {
+            const mid = Math.floor(arr.length / 2);
+            const sorted = [...arr].sort((a, b) => a - b);
+            return arr.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+        };
+    </script>
+</body>
+</html>
