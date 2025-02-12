@@ -97,7 +97,6 @@
         Contributions are welcome! If you'd like to contribute, please fork the repository and create a pull request. 
         You can also open an issue for bug reports or feature requests.
     </p>
-    <h2>License</h2>
         <h2>Contact</h2>
     <p>
         For questions or feedback, feel free to reach out:
