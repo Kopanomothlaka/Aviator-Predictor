@@ -98,10 +98,7 @@
         You can also open an issue for bug reports or feature requests.
     </p>
     <h2>License</h2>
-    <p>
-        This project is licensed under the <strong>MIT License</strong>. See the <code>LICENSE</code> file for more details.
-    </p>
-    <h2>Contact</h2>
+        <h2>Contact</h2>
     <p>
         For questions or feedback, feel free to reach out:
         <ul>
