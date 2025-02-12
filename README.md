@@ -4,53 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aviator Analyst Pro</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 20px;
-            color: #333;
-        }
-        h1, h2, h3 {
-            color: #4CAF50;
-        }
-        img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin: 10px 0;
-        }
-        .screenshot-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin: 20px 0;
-        }
-        .screenshot-grid img {
-            border: 1px solid #ddd;
-            padding: 5px;
-            background: #f9f9f9;
-        }
-        code {
-            background: #f4f4f4;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-        a {
-            color: #4CAF50;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        .highlight {
-            background: #f4f4f4;
-            padding: 10px;
-            border-left: 4px solid #4CAF50;
-            margin: 10px 0;
-        }
-    </style>
+    
 </head>
 <body>
     <h1>Aviator Analyst Pro</h1>
@@ -138,7 +92,6 @@
         <li>Run the Flask app:
             <pre><code>python app.py</code></pre>
         </li>
-        <li>Open your browser and visit <a href="http://127.0.0.1:5000" target="_blank">http://127.0.0.1:5000</a>.</li>
     </ol>
     <h2>Contributing</h2>
     <p>
@@ -153,8 +106,8 @@
     <p>
         For questions or feedback, feel free to reach out:
         <ul>
-            <li>📧 Email: <a href="mailto:support@aviatoranalystpro.com">support@aviatoranalystpro.com</a></li>
-            <li>🌐 Website: <a href="https://aviatoranalystpro.com" target="_blank">https://aviatoranalystpro.com</a></li>
+            <li>📧 Email: <a href="mailto:kopanomothlaka@gmail.com">support@aviatoranalystpro.com</a></li>
+            <li>🌐 Website: <a href="http://kaytech.fwh.is" target="_blank">https://aviatoranalystpro.com</a></li>
         </ul>
     </p>
 </body>
